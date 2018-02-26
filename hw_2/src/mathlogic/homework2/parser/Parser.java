@@ -1,4 +1,4 @@
-package mathlogic.homework2;
+package mathlogic.homework2.parser;
 
 import mathlogic.homework2.expressions.*;
 import mathlogic.homework2.expressions.Operations.*;
@@ -183,7 +183,6 @@ public class Parser {
             tokenizer = new Tokenizer(tokenizer.getRest());
             out = new Implication(out, fetchImplication());
         }
-        //System.out.println ("[imp] " + out);
         return out;
     }
 
@@ -193,7 +192,6 @@ public class Parser {
             tokenizer.parseNext();
             out = new Or(out, fetchConjunction());
         }
-        //System.out.println ("[dis] " + out);
         return out;
     }
 
@@ -203,7 +201,6 @@ public class Parser {
             tokenizer.parseNext();
             out = new And(out, fetchUnary());
         }
-        //System.out.println ("[con] " + out);
         return out;
     }
 
@@ -213,7 +210,6 @@ public class Parser {
             while (tokenizer.tokenType == PREDICATE) {
                 tokenizer.parseNext();
                 String value = tokenizer.prevPredicate;
-                //System.out.println ("> " + value);
                 ArrayList<Expression> vars = new ArrayList<>();
 
                 if (tokenizer.tokenType == OPEN) {
@@ -226,7 +222,6 @@ public class Parser {
                 out = new Predicate(value, vars);
             }
         }
-        //System.out.println ("[pred] " + out);
         return out;
     }
 
@@ -236,7 +231,6 @@ public class Parser {
             tokenizer.parseNext();
             out = new Equal(out, fetchSum());
         }
-        //System.out.println ("[term] " + out);
         return out;
     }
 
@@ -251,7 +245,6 @@ public class Parser {
                 out = new Add(out, fetchIncrement());
             }
         }
-        //System.out.println ("[sum] " + out);
         return out;
     }
 
@@ -261,7 +254,6 @@ public class Parser {
             tokenizer.parseNext();
             out = new Increment(out);
         }
-        //System.out.println ("[inc] " + out);
         return out;
     }
 
@@ -284,7 +276,6 @@ public class Parser {
                 out = new Function(name, vars);
             }
         }
-        //System.out.println ("[fun] " + out);
         return out;
     }
 
@@ -308,7 +299,6 @@ public class Parser {
             tokenizer.parseNext();
             return out;
         }
-        //System.out.println ("[low] " + out);
         return null;
     }
 
@@ -331,16 +321,12 @@ public class Parser {
             }
         }
         out = fetchPredicate();
-        //System.out.println ("!!" + out);
-
         Collections.reverse(unary);
         for (OperationTypes type : unary) {
             if (type == ANY) out = new Any(names.pop(), out);
             if (type == EXIST) out = new Exist(names.pop(), out);
             if (type == NOT) out = new Not(out);
         }
-
-        //System.out.println ("[una] " + out == null);
         return out;
     }
 }

@@ -1,4 +1,4 @@
-package mathlogic.homework2;
+package mathlogic.homework2.parser;
 
 import mathlogic.homework2.expressions.Expression;
 import mathlogic.homework2.expressions.Operations;
@@ -12,13 +12,13 @@ import java.util.Map;
 public class Deductor {
 
     private List<Expression> exps, sups = new ArrayList<>();
-    private List<String> inds, head = new ArrayList<>();
+    private List<String> head = new ArrayList<>();
 
     private Parser parser = new Parser();
 
     public void deduct(String first, List<String> proof, Matcher matcher, PrintWriter pw) {
         exps = new ArrayList<>();
-        inds = new ArrayList<>();
+        List<String> inds = new ArrayList<>();
 
         parseSups(first);
         String leftImplication = head.remove(head.size() - 1);
@@ -59,9 +59,7 @@ public class Deductor {
                 }
             }
 
-            if (flag) {
-                continue;
-            }
+            if (flag) continue;
 
             int axiom = matcher.matchProposalAxiom(exp, Axioms.proposAxioms);
             axiom = axiom > 0 ? axiom : matcher.matchFormalAxiom(exp, Axioms.formalAxioms);
@@ -155,18 +153,11 @@ public class Deductor {
         String cur = "";
 
         while (index < str.length()) {
-            while (str.charAt(index) == ' ')
-                index++;
+            while (str.charAt(index) == ' ') index++;
             while (index < str.length() && (str.charAt(index) != ',' || balance != 0) && index < str.length() && str.charAt(index) != '|') {
-                if (str.charAt(index) != ' ') {
-                    cur += str.charAt(index);
-                }
-                if (str.charAt(index) == '(') {
-                    balance++;
-                }
-                if (str.charAt(index) == ')') {
-                    balance--;
-                }
+                if (str.charAt(index) != ' ') cur += str.charAt(index);
+                if (str.charAt(index) == '(') balance++;
+                if (str.charAt(index) == ')') balance--;
                 index++;
             }
             number++;
@@ -175,17 +166,11 @@ public class Deductor {
             sups.add(parser.parse(cur));
 
             cur = "";
-            if (index < str.length() && str.charAt(index) == ',') {
-                index++;
-            }
-            while (index < str.length() && str.charAt(index) == ' ') {
-                index++;
-            }
+            if (index < str.length() && str.charAt(index) == ',') index++;
+            while (index < str.length() && str.charAt(index) == ' ') index++;
             if (index < str.length() && str.charAt(index) == '|') {
                 index += 2;
-                while (str.charAt(index) == ' ') {
-                    index++;
-                }
+                while (str.charAt(index) == ' ') index++;
                 index = str.length();
             }
         }

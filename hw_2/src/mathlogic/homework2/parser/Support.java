@@ -1,4 +1,4 @@
-package mathlogic.homework2;
+package mathlogic.homework2.parser;
 
 import javafx.util.Pair;
 import mathlogic.homework2.expressions.Operations;
@@ -63,7 +63,7 @@ public class Support {
                 }
             }
         }
-        return new Pair<Integer, Integer>(first, second);
+        return new Pair<>(first, second);
     }
 
     public static void checkForSpecial(Expression exp, String str, Matcher matcher, PrintWriter pw) {

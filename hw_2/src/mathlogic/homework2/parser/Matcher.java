@@ -1,5 +1,6 @@
-package mathlogic.homework2;
+package mathlogic.homework2.parser;
 
+import mathlogic.homework2.Main;
 import mathlogic.homework2.expressions.*;
 import mathlogic.homework2.expressions.Operations.*;
 
@@ -18,16 +19,12 @@ public class Matcher {
     public boolean extSub = false;
 
     public boolean structEqual(Expression left, Expression right, Map<String, Expression> exps) {
-        if (left == null || right == null) {
-            return false;
-        }
-
+        if (left == null || right == null) return false;
         if (left.getClass() == right.getClass()) {
             if (left instanceof Binary) {
                 Binary bleft = (Binary) left;
                 Binary bright = (Binary) right;
-                return structEqual(bleft.left, bright.left, exps)
-                        && structEqual(bleft.right, bright.right, exps);
+                return structEqual(bleft.left, bright.left, exps) && structEqual(bleft.right, bright.right, exps);
             }
 
             if (left instanceof Const) {
@@ -39,24 +36,18 @@ public class Matcher {
             if (left instanceof Predicate || left instanceof Function) {
                 Function pleft = (Function) left;
                 Function pright = (Function) right;
-                if (pleft.vars.size() != pright.vars.size()
-                        || !pleft.name.equals(pright.name)) {
-                    return false;
-                }
-
+                if (pleft.vars.size() != pright.vars.size() || !pleft.name.equals(pright.name)) return false;
                 boolean flag = true;
                 for (int i = 0; flag && i < pleft.vars.size(); i++) {
                     flag = structEqual(pleft.vars.get(i), pright.vars.get(i), exps);
                 }
-
                 return flag;
             }
 
             if (left instanceof Quantor) {
                 Quantor qleft = (Quantor) left;
                 Quantor qright = (Quantor) right;
-                return structEqual(qleft.variable, qright.variable, exps)
-                        && structEqual(qleft.expression, qright.expression, exps);
+                return structEqual(qleft.variable, qright.variable, exps) && structEqual(qleft.expression, qright.expression, exps);
             }
 
             if (left instanceof Unary) {
@@ -77,10 +68,7 @@ public class Matcher {
                 }
 
                 String name = vright.name;
-                if (exps.containsKey(name)) {
-                    return deepEqual(left, exps.get(name));
-                }
-
+                if (exps.containsKey(name)) return deepEqual(left, exps.get(name));
                 exps.put(name, left);
                 return true;
             }
@@ -92,79 +80,59 @@ public class Matcher {
             if (exps.containsKey(name)) {
                 return deepEqual(left, exps.get(name));
             }
-
             exps.put(name, left);
             return true;
         }
-
         return false;
     }
 
-    /////////////////////////////////////////////////////////////////////
-
     public boolean deepEqual(Expression left, Expression right) {
-        if (left == null || right == null) {
-            return false;
-        }
+        if (left == null || right == null) return false;
 
         if (left.getClass() == right.getClass()) {
-            //System.out.println ("Left: " + left + ", right: " + right);
+            if(Main.DEBUG) System.out.println ("Left: " + left + ", right: " + right);
 
-            if (left instanceof Binary) {
-                //System.out.println ("1");
+            if (left instanceof Binary) {//1
                 Binary bleft = (Binary) left;
                 Binary bright = (Binary) right;
                 return deepEqual(bleft.left, bright.left)
                         && deepEqual(bleft.right, bright.right);
             }
 
-            if (left instanceof Const) {
-                //System.out.println ("2");
+            if (left instanceof Const) {//2
                 Const cleft = (Const) left;
                 Const cright = (Const) right;
                 return cleft.name.equals(cright.name);
             }
 
-            if (left instanceof Predicate || left instanceof Function) {
-                //System.out.println ("34");
+            if (left instanceof Predicate || left instanceof Function) {//3, 4
                 Function pleft = (Function) left;
                 Function pright = (Function) right;
-                if (pleft.vars.size() != pright.vars.size()
-                        || !pleft.name.equals(pright.name)) {
+                if (pleft.vars.size() != pright.vars.size() || !pleft.name.equals(pright.name)) {
                     return false;
                 }
 
                 boolean flag = true;
-                for (int i = 0; flag && i < pleft.vars.size(); i++) {
-                    //System.out.println (i + " " + pleft.vars.get (i) + " " + pright.vars.get (i));
-
-                    flag &= pleft.vars.get(i).toString().equals(pright.vars.get(i).toString());
-                    if (!flag) {
-                        break;
-                    }
+                for (int i = 0; i < pleft.vars.size(); i++) {
+                    flag = pleft.vars.get(i).toString().equals(pright.vars.get(i).toString());
+                    if (!flag) break;
                 }
-
-                //System.out.println (flag);
                 return flag;
             }
 
-            if (left instanceof Quantor) {
-                //System.out.println ("5");
+            if (left instanceof Quantor) {//5
                 Quantor qleft = (Quantor) left;
                 Quantor qright = (Quantor) right;
-                return deepEqual(qleft.expression, qright.expression)
-                        && deepEqual(qleft.variable, qright.variable);
+                return deepEqual(qleft.expression, qright.expression) && deepEqual(qleft.variable, qright.variable);
             }
 
-            if (left instanceof Unary) {
-                //System.out.println ("6");
+            if (left instanceof Unary) {//6
                 Unary uleft = (Unary) left;
                 Unary uright = (Unary) right;
                 return deepEqual(uleft.left, uright.left);
             }
 
-            if (left instanceof Variable) {
-                //System.out.println ("7");
+            if (left instanceof Variable) {//7
                 Variable vleft = (Variable) left;
                 Variable vright = (Variable) right;
                 return vleft.name.equals(vright.name);
@@ -174,34 +142,7 @@ public class Matcher {
         return false;
     }
 
-	/*
-	 	CLASS
-		5.1
-		CLASS
-		7
-		CLASS
-		4
-		CLASS
-		4
-		CLASS
-		7
-		CLASS
-		7
-		CLASS
-		7
-		
-		/////
-		CLASS
-		5
-		CLASS
-		34
-	 */
-
-    ///////////////////////////////
-
     public int matchProposalAxiom(Expression expression, Expression[] axioms) {
-        //System.out.println (expressions);
-
         for (int i = 0; i < axioms.length; i++) {
             if (structEqual(expression, axioms[i], new HashMap<>())) {
                 return i + 1;
@@ -221,8 +162,7 @@ public class Matcher {
 
                     if (deepEqual(imp.right, ((Any) tmp).expression)) {
                         Expression exp = map.get(any.variable.name);
-                        if (deepEqual(exp, any.variable)
-                                || matchQuantor(any.expression, any.variable, false, false, exp)) {
+                        if (deepEqual(exp, any.variable) || matchQuantor(any.expression, any.variable, false, false, exp)) {
                             return 11;
                         }
                     } else {
@@ -242,12 +182,10 @@ public class Matcher {
                 if (structEqual(imp.left, exist.expression, map)) {
                     Expression back = expression.getInstance();
                     Expression tmp = getSubstitution(imp.right, exist.variable, map.get(exist.variable.name));
-                    expression = back;
 
                     if (deepEqual(imp.left, ((Exist) tmp).expression)) {
                         Expression exp = map.get(exist.variable.name);
-                        if (deepEqual(exp, exist.variable)
-                                || matchQuantor(exist.expression, exist.variable, false, false, exp)) {
+                        if (deepEqual(exp, exist.variable) || matchQuantor(exist.expression, exist.variable, false, false, exp)) {
                             return 12;
                         }
                     } else {
@@ -256,7 +194,6 @@ public class Matcher {
                 }
             }
         }
-
         return -1;
     }
 
@@ -266,7 +203,6 @@ public class Matcher {
                 return j + 1;
             }
         }
-
         return -1;
     }
 
@@ -275,11 +211,10 @@ public class Matcher {
             Binary bexp = (Binary) exp;
             bexp.left = getSubstitution(bexp.left, var, sub);
             bexp.right = getSubstitution(bexp.right, var, sub);
-
             return bexp;
         }
 
-        if (exp instanceof Function || exp instanceof Predicate) {
+        if (exp instanceof Function) {
             Function fexp = (Function) exp;
             fexp.vars = fexp.vars.stream()
                     .map(e -> getSubstitution(e, var, sub))
@@ -291,23 +226,18 @@ public class Matcher {
             Quantor qexp = (Quantor) exp;
             deepEqual(qexp.variable, sub);
             qexp.expression = getSubstitution(qexp.expression, var, sub);
-
             return qexp;
         }
 
         if (exp instanceof Unary) {
             Unary uexp = (Unary) exp;
             uexp.left = getSubstitution(uexp.left, var, sub);
-
             return uexp;
         }
 
         if (exp instanceof Variable) {
-            if (deepEqual(exp, var)) {
-                return sub;
-            }
+            if (deepEqual(exp, var)) return sub;
         }
-
         return exp;
     }
 
@@ -365,14 +295,12 @@ public class Matcher {
                             this.anySub = true;
                             return -1;
                         }
-
                         index = i;
                         break;
                     }
                 }
             }
         }
-
         return index;
     }
 
@@ -383,31 +311,23 @@ public class Matcher {
 
         for (int i = exps.size() - 1; i >= 0; i--) {
             Expression tmp = exps.get(i);
-            //System.out.println (i + " > > > ");
-            //System.out.println ("TMP: " + tmp);
-            //System.out.println ((tmp instanceof Implication ? ((Implication) tmp).right : ""));
             if (tmp instanceof Implication && deepEqual(((Implication) tmp).right, iexp.right)) {
                 Implication itmp = (Implication) tmp;
                 if (iexp.left instanceof Exist && deepEqual(itmp.left, ((Exist) iexp.left).expression)) {
                     Exist eiexp = (Exist) iexp.left;
                     this.ext = true;
-
                     if (hasFreeInstance(eiexp.variable, iexp.right)) {
                         int sz = supts.size();
                         if (!supts.isEmpty() && !hasFreeInstance(eiexp.variable, supts.get(sz - 1))) {
                             this.anySub = true;
                             return -1;
                         }
-
                         index = i;
-                        //System.out.println ("I: " + index + " exp: " + exp);
                         break;
                     }
                 }
             }
         }
-
-        //System.out.println ("I: " + index + " exp: " + exp);
         return index;
     }
 
@@ -418,8 +338,7 @@ public class Matcher {
     public boolean matchFreeInstance(Variable var, Expression exp, boolean isQuantor) {
         if (exp instanceof Binary) {
             Binary bexp = (Binary) exp;
-            return matchFreeInstance(var, bexp.left, isQuantor)
-                    && matchFreeInstance(var, bexp.right, isQuantor);
+            return matchFreeInstance(var, bexp.left, isQuantor) && matchFreeInstance(var, bexp.right, isQuantor);
         }
 
         if (exp instanceof Predicate || exp instanceof Function) {
@@ -431,33 +350,25 @@ public class Matcher {
                     break;
                 }
             }
-
             return !flag || isQuantor;
         }
 
         if (exp instanceof Quantor) {
             Quantor qexp = (Quantor) exp;
-            return deepEqual(qexp.variable, var)
-                    || matchFreeInstance(var, qexp.expression, isQuantor);
+            return deepEqual(qexp.variable, var) || matchFreeInstance(var, qexp.expression, isQuantor);
         }
 
         if (exp instanceof Unary) {
             Unary uexp = (Unary) exp;
             return matchFreeInstance(var, uexp.left, isQuantor);
         }
-
-        if (exp instanceof Variable && deepEqual(exp, var)) { /*System.out.println ("1");*/
-            return isQuantor;
-        }
-
-        return true;
+        return !(exp instanceof Variable && deepEqual(exp, var)) || isQuantor;
     }
 
     public boolean finalCheck(Expression e) {
         if (e instanceof Implication) {
             Implication iexp = (Implication) e;
-            if (iexp.left instanceof And
-                    && ((And) iexp.left).right instanceof Any) {
+            if (iexp.left instanceof And && ((And) iexp.left).right instanceof Any) {
                 HashMap<String, Expression> map = new HashMap<>();
                 if (structEqual(((And) iexp.left).left, iexp.right, map)) {
                     Variable var = ((Any) ((And) iexp.left).right).variable;
@@ -479,8 +390,6 @@ public class Matcher {
                 }
             }
         }
-
         return false;
     }
-
 }

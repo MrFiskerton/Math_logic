@@ -1,5 +1,6 @@
-package mathlogic.homework2;
+package mathlogic.homework2.parser;
 
+import mathlogic.homework2.Main;
 import mathlogic.homework2.expressions.Expression;
 
 public class Axioms {
